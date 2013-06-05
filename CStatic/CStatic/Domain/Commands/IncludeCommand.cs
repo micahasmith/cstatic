@@ -15,7 +15,7 @@ namespace CStatic.Domain.Commands
             get { return "include"; }
         }
 
-        public StringBuilder Run(SiteConfig sConfig, IEnumerable<string> args,StringBuilder text, Match match)
+        public StringBuilder Run(SiteConfig sConfig, ItemConfig item, IEnumerable<string> args,StringBuilder text, Match match)
         {
             var file = args.ElementAt(0);
             var incText = Runner.GetFileText(sConfig, file);

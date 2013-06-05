@@ -20,16 +20,16 @@ namespace CStatic.Domain
             {"placein",new PlaceInCommand()}
         };
 
-        public string ProcessFile(SiteConfig sconfig, string fileName)
+        public string ProcessFile(SiteConfig sconfig, ItemConfig item, string fileName)
         {
-            string subject = fileName;
+            fileName = fileName.Replace("\\","/");
             
-            if (!string.IsNullOrEmpty(subject))
+            if (!string.IsNullOrEmpty(fileName))
             {
-                var cached = Cacher.Get(subject);
+                var cached = Cacher.Get(fileName);
                 if (cached != null)
                 {
-                    Console.WriteLine("Processing: serving {0} from cache", subject.Replace(sconfig.WorkingDir,""));
+                    Console.WriteLine("Processing: serving {0} from cache", fileName.Replace(sconfig.WorkingDir,""));
                     return cached.ToString();
                 }
             }
@@ -38,48 +38,19 @@ namespace CStatic.Domain
 
             foreach (var match in GetMatches(text))
             {
-                if (!string.IsNullOrEmpty(subject))
+                if (!string.IsNullOrEmpty(fileName))
                 {
-                    Console.WriteLine("Processing {0} :: {1}", subject, match.Value);
+                    Console.WriteLine("Processing {0} :: {1}", fileName, match.Value);
                 }
 
                 var info = GetCommandInfoFromMatch(match);
-                sb = ProcessMatch(sconfig, sb, match, info);
+                sb = ProcessMatch(sconfig,item, sb, match, info);
             }
 
-            if (!string.IsNullOrEmpty(subject))
-                Cacher.Set(subject, sb.ToString());
+            if (!string.IsNullOrEmpty(fileName))
+                Cacher.Set(fileName, sb.ToString());
             return sb.ToString();
         }
-
-        public string Process(SiteConfig sconfig, string text, string subject = null)
-        {
-            if (!string.IsNullOrEmpty(subject))
-            {
-                var cached = Cacher.Get(subject);
-                if (cached != null)
-                {
-                    Console.WriteLine("Processing: serving {0} from cache", subject);
-                    return cached.ToString();
-                }
-            }
-            var sb = new StringBuilder(text);
-
-            foreach (var match in GetMatches(text))
-            {
-                if (!string.IsNullOrEmpty(subject))
-                {
-                    Console.WriteLine("Processing {0} :: {1}", subject, match.Value);
-                }
-                var info = GetCommandInfoFromMatch(match);
-                sb = ProcessMatch(sconfig, sb, match, info);
-            }
-
-            if (!string.IsNullOrEmpty(subject))
-                Cacher.Set(subject, sb.ToString());
-            return sb.ToString();
-        }
-
         
 
         public static IEnumerable<Match> GetMatches(string text)
@@ -89,17 +60,15 @@ namespace CStatic.Domain
 
             yield break;
         }
+   
 
-
-       
-
-        public static StringBuilder ProcessMatch(SiteConfig sconfig, StringBuilder sb, Match match, Tuple<string, IEnumerable<string>> cmdInfo)
+        public static StringBuilder ProcessMatch(SiteConfig sconfig, ItemConfig item, StringBuilder sb, Match match, Tuple<string, IEnumerable<string>> cmdInfo)
         {
             if (cmdInfo != null)
             {
                 if (_Commands.ContainsKey(cmdInfo.Item1.ToLower()))
                 {
-                    sb =  _Commands[cmdInfo.Item1].Run(sconfig, cmdInfo.Item2, sb, match);
+                    sb =  _Commands[cmdInfo.Item1].Run(sconfig,item, cmdInfo.Item2, sb, match);
                     return sb;
                 }
                 else

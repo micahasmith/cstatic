@@ -14,7 +14,7 @@ namespace CStatic.Domain.Commands
             get { return "placein"; }
         }
 
-        public StringBuilder Run(SiteConfig sConfig, IEnumerable<string> args, StringBuilder text, Match match)
+        public StringBuilder Run(SiteConfig sConfig, ItemConfig item, IEnumerable<string> args, StringBuilder text, Match match)
         {
             var filetext = Runner.GetFileText(sConfig, args.ElementAt(0));
 

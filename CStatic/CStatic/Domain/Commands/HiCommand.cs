@@ -13,7 +13,7 @@ namespace CStatic.Domain.Commands
 
 
 
-        public StringBuilder Run(SiteConfig sConfig, IEnumerable<string> args, StringBuilder text, Match match)
+        public StringBuilder Run(SiteConfig sConfig, ItemConfig item, IEnumerable<string> args, StringBuilder text, Match match)
         {
             return text.Replace(match.Value, "hi");
         }

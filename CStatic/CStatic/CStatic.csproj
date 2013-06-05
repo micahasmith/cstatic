@@ -49,6 +49,7 @@
     <Compile Include="Domain\Commands\ICommand.cs" />
     <Compile Include="Domain\Commands\IncludeCommand.cs" />
     <Compile Include="Domain\Commands\PlaceInCommand.cs" />
+    <Compile Include="Domain\Commands\VarCommand.cs" />
     <Compile Include="Domain\ItemConfig.cs" />
     <Compile Include="Domain\Processor.cs" />
     <Compile Include="Domain\Runner.cs" />

@@ -71,7 +71,7 @@ namespace CStatic.Domain
 
             if (!File.Exists(finalDest))
             {
-                var output = new Processor().ProcessFile(sConfig, Path.Combine(sConfig.WorkingDir, item.Source));
+                var output = new Processor().ProcessFile(sConfig, item,Path.Combine(sConfig.WorkingDir, item.Source));
                 File.WriteAllText(finalDest, output);
                 item.HadRun = true;
             }
@@ -105,7 +105,7 @@ namespace CStatic.Domain
             else
             {
                 var ff = Path.Combine(sConfig.WorkingDir, file);
-                incText = new Processor().ProcessFile(sConfig, ff);
+                incText = new Processor().ProcessFile(sConfig,null, ff);
             }
             return new StringBuilder(incText);
         }

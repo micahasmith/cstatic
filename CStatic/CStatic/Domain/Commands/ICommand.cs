@@ -10,7 +10,7 @@ namespace CStatic.Domain.Commands
     public interface ICommand
     {
          string Name { get; }
-         StringBuilder Run(SiteConfig sConfig, IEnumerable<string> args, StringBuilder text, Match match);
+         StringBuilder Run(SiteConfig sConfig, ItemConfig item, IEnumerable<string> args, StringBuilder text, Match match);
 
     }
 }

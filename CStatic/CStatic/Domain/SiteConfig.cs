@@ -12,12 +12,14 @@ namespace CStatic.Domain
         public string WorkingDir { get; set; }
         public string ExportDir { get; set; }
 
-        public HashSet<string> DistIgnorePaths { get; set; }
+        public string[] DistIgnorePaths { get; set; }
 
         public SiteConfig()
         {
             Items = new List<ItemConfig>();
-            DistIgnorePaths = new HashSet<string>();
+            DistIgnorePaths = new string[] { };
         }
+
+        
     }
 }
