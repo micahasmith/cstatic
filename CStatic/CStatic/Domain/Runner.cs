@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using CStatic.Domain.Commands;
 using System.IO;
 
@@ -14,7 +13,6 @@ namespace CStatic.Domain
     {
         public void Run(SiteConfig sConfig)
         {
-            var processor = new Processor();
             PrepDist(sConfig);
             
 
