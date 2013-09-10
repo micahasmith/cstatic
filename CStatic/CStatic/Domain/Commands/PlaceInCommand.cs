@@ -14,21 +14,29 @@ namespace CStatic.Domain.Commands
             get { return "placein"; }
         }
 
-        public StringBuilder Run(SiteConfig sConfig, ItemConfig item, IEnumerable<string> args, StringBuilder text, Match match)
+        public StringBuilder Run(CommandContext ctx)
         {
-            var filetext = Runner.GetFileText(sConfig, args.ElementAt(0));
+            var filetext = Runner.GetFileText(ctx.SiteConfig, ctx.Match.Args.ElementAt(0),ctx.Vars);
 
             var matches = Processor.GetMatches(filetext.ToString());
-            text = text.Replace(match.Value, "");
+            ctx.Text = ctx.Text.Replace(ctx.Match.Match.Value, "");
+
+            Func<StringBuilder> final = null;
             foreach (var m in matches)
             {
                 var info = Processor.GetCommandInfoFromMatch(m);
-                if (info.Item1 != "placeholder") continue;
-                return filetext.Replace(m.Value,text.ToString());
+                if (info.CommandName == "placeholder")
+                {
+                    final = ()=> 
+                    {
+                        
+                        return filetext.Replace(m.Value, ctx.Text.ToString());
+                    };
+                }
             }
 
-            Console.WriteLine("couldn't find placeholder for {0}", match.Value);
-            return new StringBuilder();
+            return final();
+
         }
     }
 }

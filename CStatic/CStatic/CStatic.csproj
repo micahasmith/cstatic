@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MoreLinq">
+      <HintPath>..\packages\morelinq.1.0.16006\lib\net35\MoreLinq.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\packages\ServiceStack.Text.3.9.48\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
@@ -45,11 +48,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\CommandMatch.cs" />
+    <Compile Include="Domain\Commands\CommandContext.cs" />
+    <Compile Include="Domain\Extensions.cs" />
     <Compile Include="Domain\Commands\HiCommand.cs" />
     <Compile Include="Domain\Commands\ICommand.cs" />
     <Compile Include="Domain\Commands\IncludeCommand.cs" />
     <Compile Include="Domain\Commands\PlaceInCommand.cs" />
-    <Compile Include="Domain\Commands\VarCommand.cs" />
+    <Compile Include="Domain\Commands\GetVarCommand.cs" />
     <Compile Include="Domain\ItemConfig.cs" />
     <Compile Include="Domain\Processor.cs" />
     <Compile Include="Domain\Runner.cs" />

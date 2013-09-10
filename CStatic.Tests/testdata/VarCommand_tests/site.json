@@ -1,0 +1,15 @@
+﻿{
+	"Items":[
+		{
+			"Source":"master.html",
+			"Dest":"out1.html",
+			"Vars": {
+				"name":"micah"
+			}
+		},
+				{
+			"Source":"child2.html",
+			"Dest":"out2.html"
+		}
+		]
+}

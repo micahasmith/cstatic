@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ServiceStack.Text, Version=3.9.59.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CStatic\packages\ServiceStack.Text.3.9.59\lib\net35\ServiceStack.Text.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,17 +46,35 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers.cs" />
+    <Compile Include="Helpers_tests.cs" />
+    <Compile Include="IncludeCommand_tests.cs" />
+    <Compile Include="PlaceInCommand_tests.cs" />
     <Compile Include="processor_tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestContext.cs" />
+    <Compile Include="VarCommand_tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="testdata\IncludeCommand_tests\site.json" />
+    <None Include="testdata\VarCommand_tests\site.json" />
+    <None Include="testdata\PlaceInCommand_tests\site.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CStatic\CStatic\CStatic.csproj">
       <Project>{6891add5-a9d7-41dd-ae7d-3bc42fd363f8}</Project>
       <Name>CStatic</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="testdata\IncludeCommand_tests\child1.html" />
+    <Content Include="testdata\IncludeCommand_tests\master.html" />
+    <Content Include="testdata\VarCommand_tests\child2.html" />
+    <Content Include="testdata\VarCommand_tests\master.html" />
+    <Content Include="testdata\PlaceInCommand_tests\child1.html" />
+    <Content Include="testdata\PlaceInCommand_tests\master.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

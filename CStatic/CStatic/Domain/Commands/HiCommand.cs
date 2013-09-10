@@ -13,9 +13,9 @@ namespace CStatic.Domain.Commands
 
 
 
-        public StringBuilder Run(SiteConfig sConfig, ItemConfig item, IEnumerable<string> args, StringBuilder text, Match match)
+        public StringBuilder Run(CommandContext ctx)
         {
-            return text.Replace(match.Value, "hi");
+            return ctx.Text.Replace(ctx.Match.Match.Value, "hi");
         }
     }
 }

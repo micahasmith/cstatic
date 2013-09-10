@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CStatic.Domain.Commands;
 using System.IO;
+using ServiceStack.Text;
 
 namespace CStatic.Domain
 {
@@ -20,6 +21,11 @@ namespace CStatic.Domain
             {
                 RunItem(sConfig, item);
             }
+        }
+
+        public void Run(string siteConfigJson)
+        {
+            Run(siteConfigJson.FromJson<SiteConfig>());
         }
 
         private static void PrepDist(SiteConfig sConfig)
@@ -58,7 +64,7 @@ namespace CStatic.Domain
 
         }
 
-        public string RunItem(SiteConfig sConfig, ItemConfig item)
+        public string RunItem(SiteConfig sConfig, ItemConfig item,Dictionary<string,string> vars = null)
         {
             Console.WriteLine("running {0}", item.Source);
             var dist = sConfig.ExportDir;
@@ -69,7 +75,7 @@ namespace CStatic.Domain
 
             if (!File.Exists(finalDest))
             {
-                var output = new Processor().ProcessFile(sConfig, item,Path.Combine(sConfig.WorkingDir, item.Source));
+                var output = new Processor().ProcessFile(sConfig, item,Path.Combine(sConfig.WorkingDir, item.Source),vars);
                 File.WriteAllText(finalDest, output);
                 item.HadRun = true;
             }
@@ -91,20 +97,24 @@ namespace CStatic.Domain
             }
         }
 
-        public static StringBuilder GetFileText(SiteConfig sConfig, string file)
+        public static StringBuilder GetFileText(SiteConfig sConfig, string file, Dictionary<string,string> vars = null)
         {
             var distFile = sConfig.Items.FirstOrDefault(i => i.Source == file);
             string incText = null;
             if (distFile != null)
             {
-                new Runner().RunItem(sConfig, distFile);
-                incText = File.ReadAllText(Path.Combine(sConfig.ExportDir, file));
+                new Runner().RunItem(sConfig, distFile,vars);
+                var genpath = Path.Combine(sConfig.ExportDir, file);
+                if (File.Exists(genpath))
+                {
+                    incText = File.ReadAllText(genpath);
+                    return new StringBuilder(incText);
+                }
             }
-            else
-            {
-                var ff = Path.Combine(sConfig.WorkingDir, file);
-                incText = new Processor().ProcessFile(sConfig,null, ff);
-            }
+            
+            var ff = Path.Combine(sConfig.WorkingDir, file);
+            incText = new Processor().ProcessFile(sConfig,null, ff,vars);
+            
             return new StringBuilder(incText);
         }
 

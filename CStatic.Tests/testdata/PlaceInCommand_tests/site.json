@@ -1,0 +1,8 @@
+﻿{
+	"Items":[
+		{
+			"Source":"child1.html",
+			"Dest":"out1.html"
+		}
+		]
+}

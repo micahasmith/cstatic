@@ -15,12 +15,12 @@ namespace CStatic.Domain.Commands
             get { return "include"; }
         }
 
-        public StringBuilder Run(SiteConfig sConfig, ItemConfig item, IEnumerable<string> args,StringBuilder text, Match match)
+        public StringBuilder Run(CommandContext ctx)
         {
-            var file = args.ElementAt(0);
-            var incText = Runner.GetFileText(sConfig, file);
+            var file = ctx.Match.Args.ElementAt(0);
+            var incText = Runner.GetFileText(ctx.SiteConfig, file);
 
-            return text.Replace(match.Value, incText.ToString());
+            return ctx.Text.Replace(ctx.Match.Match.Value, incText.ToString());
         }
 
        
