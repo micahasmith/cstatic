@@ -17,58 +17,86 @@ namespace CStatic.Domain
         private static Dictionary<string, ICommand> _Commands = new Dictionary<string, ICommand>()
         {
             {"include",new IncludeCommand()},
-            {"hi",new HiCommand()},
             {"placein",new PlaceInCommand()},
             {"getvar",new GetVarCommand()},
         };
 
-        public string ProcessFile(SiteConfig sconfig, ItemConfig item, string fileName, Dictionary<string,string> vars = null)
+        private static ExecutionTracker _Tracker = new ExecutionTracker();
+
+        public static ProcessResult Process(ProcessRequest req)
         {
-            fileName = fileName.Replace("\\","/");
-            
+            var result = new ProcessResult();
+            req.SourceFileName = req.SourceFileName.Replace("\\", "/");
+
             //try to get a cached value first
-            if (!string.IsNullOrEmpty(fileName))
+            if (!string.IsNullOrEmpty(req.SourceFileName))
             {
-                var cached = Cacher.Get(fileName);
+                var cached = _Tracker.GetResult(req.SourceFileName);
                 if (cached != null)
                 {
-                    Console.WriteLine("Processing: serving {0} from cache", fileName.Replace(sconfig.WorkingDir,""));
-                    var cachedText = new StringBuilder(cached.ToString());
-                    var cacheMatches = GetMatches(cachedText.ToString())
-                        .Select(GetCommandInfoFromMatch)
-                        .Where(i => i.CommandName == "var" || i.CommandName == "vars" || i.CommandName == "getvar");
-                    var fvars = CompileVars(item, vars, cachedText.ToString(), cacheMatches);
+                    Console.WriteLine("Processing: serving {0} from cache", req.SourceFileName.Replace(req.SiteConfig.WorkingDir, ""));
+                    var cachedText = new StringBuilder(cached.Text.ToString());
+
+                    //even if a final page is cached, we still may need to mix vars into its output
+                    var cacheMatches = CommandProcessor.GetCommandMatchesFromText(cached.Text.ToString())
+                        .Where(i => i.CommandName == "var" || i.CommandName == "vars" || i.CommandName == "getvar")
+                        .Where(i => !req.ExcludeCommands.Contains(i.CommandName));
+                    var fvars = CompileVars(req.ItemConfig, req.Vars, cachedText.ToString(), cacheMatches);
                     foreach (var match in cacheMatches)
-                    {
-                        cachedText = ProcessFileMatch(sconfig, item, fileName, cachedText, fvars, match);
-                    }
-                    return cachedText.ToString();
+                        cachedText = ProcessMatch(req, cachedText, fvars, match);
+                    result.Text = cachedText;
+                    return result;
                 }
             }
 
             //read the actual item's text
-            string text = File.ReadAllText(fileName);
+            string text = File.ReadAllText(req.SourceFileName);
             var sb = new StringBuilder(text);
 
             //get all matches
-            var matches = GetMatches(text).Select(GetCommandInfoFromMatch);
+            var matches = CommandProcessor.GetCommandMatchesFromText(text);
 
-            var finalVars = CompileVars(item, vars, text, matches);
+            var finalVars = CompileVars(req.ItemConfig, req.Vars, text, matches);
 
             foreach (var match in matches)
             {
-                sb = ProcessFileMatch(sconfig, item, fileName, sb, finalVars, match);
+                sb = ProcessMatch(req, sb, finalVars, match);
             }
+            result.Text = sb;
 
-            if (!string.IsNullOrEmpty(fileName))
-                Cacher.Set(fileName, sb.ToString());
-            return sb.ToString();
+            if (!string.IsNullOrEmpty(req.SourceFileName))
+                _Tracker.AddResult(req, result);
+            
+
+            return result;
         }
 
-        private Dictionary<string, string> CompileVars(ItemConfig item, Dictionary<string, string> vars, string text, IEnumerable<CommandMatch> matches)
+        private static StringBuilder ProcessMatch(ProcessRequest req, StringBuilder sb, Dictionary<string, string> finalVars, CommandMatch match)
         {
+            Console.WriteLine("Processing {0} :: {1}", req.SourceFileName, match.Match.Value);
+            if (_Commands.ContainsKey(match.CommandName.ToLower()))
+            {
+                sb = _Commands[match.CommandName.ToLower()].Run(new CommandContext(req, sb, match, finalVars));
+            }
+            else
+            {
+                Console.WriteLine("Processing: {0} does not match a registered command", match.CommandName);
+            }
+            return sb;
+        }
+
+        private static Dictionary<string, string> CompileVars(ItemConfig item, Dictionary<string, string> vars, string text, IEnumerable<CommandMatch> matches)
+        {
+            var globalVars = new Dictionary<string, string>();
+            var now = DateTime.Now;
+            globalVars["date.year"] = now.Year.ToString();
+            globalVars["date.month"] = now.Month.ToString();
+            globalVars["date.day"] = now.Day.ToString();
+
             //start placing in vars
             var finalVars = new Dictionary<string, string>();
+            finalVars.MixIn(globalVars);
+
             if (vars != null)
                 finalVars.MixIn(vars);
 
@@ -81,7 +109,7 @@ namespace CStatic.Domain
             return finalVars;
         }
 
-        private Dictionary<string, string> GetPageVars(string text, IEnumerable<CommandMatch> matches)
+        private static Dictionary<string, string> GetPageVars(string text, IEnumerable<CommandMatch> matches)
         {
             var r = new Dictionary<string, string>();
             matches.Where(i => i.CommandName == "var" || i.CommandName == "vars")
@@ -90,87 +118,5 @@ namespace CStatic.Domain
             return r;
             
         }
-
-        private static StringBuilder ProcessFileMatch(SiteConfig sconfig, ItemConfig item, string fileName, StringBuilder sb, Dictionary<string, string> finalVars, CommandMatch match)
-        {
-            if (!string.IsNullOrEmpty(fileName))
-            {
-                Console.WriteLine("Processing {0} :: {1}", fileName, match.Match.Value);
-            }
-
-            sb = ProcessMatch(sconfig, item, sb, match, finalVars);
-            return sb;
-        }
-        
-
-        public static IEnumerable<Match> GetMatches(string text)
-        {
-            foreach (Match m in Regex.Matches(text, @"(\<\![-]*\s*\{\{)[^{]*(\}\}\s*[-]*\>)"))
-                yield return m;
-
-            yield break;
-        }
-   
-
-        /// <summary>
-        /// Runs the match against its corresponding command
-        /// </summary>
-        public static StringBuilder ProcessMatch(SiteConfig sconfig, ItemConfig item, StringBuilder sb, CommandMatch match, Dictionary<string,string> vars)
-        {
-            if (match != null)
-            {
-                if (_Commands.ContainsKey(match.CommandName.ToLower()))
-                {
-                    sb =  _Commands[match.CommandName.ToLower()].Run( new CommandContext(){
-                        SiteConfig = sconfig,
-                        Item = item,
-                        Match = match,
-                        Text = sb,
-                        Vars = vars
-                    });
-                       
-                    return sb;
-                }
-                else
-                {
-                    Console.WriteLine("Processing: {0} does not match a registered command", match.CommandName);
-                }
-            }
-            return sb;
-        }
-
-        /// <summary>
-        /// Extracts command name and arguments out of the regex match
-        /// </summary>
-        public static CommandMatch GetCommandInfoFromMatch(Match m)
-        {
-            var val = m.Value;
-            int start = val.LastIndexOf("{");
-            int end = val.IndexOf("}");
-            val = val.Substring(start + 1, (end - 1) - start);
-            var parts = val.Split('=').Select(i => i.Trim()).ToArray();
-            IEnumerable<string> args = new List<string>();
-            if (parts.Length > 0)
-            {
-                try
-                {
-                    args = parts[1].Split(',').Select(i => i.Trim());
-                    return new CommandMatch()
-                    {
-                        Args = args,
-                        CommandName = parts[0].ToLower(),
-                        Match = m
-                    };
-                }
-                catch (Exception e)
-                {
-                    throw new ApplicationException("error parsing the command "+val,e);
-                }
-            }
-            return null;
-        }
-
-
-
     }
 }

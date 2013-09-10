@@ -16,21 +16,23 @@ namespace CStatic.Domain.Commands
 
         public StringBuilder Run(CommandContext ctx)
         {
-            var filetext = Runner.GetFileText(ctx.SiteConfig, ctx.Match.Args.ElementAt(0),ctx.Vars);
+            var filePath = ctx.SiteConfig.GetSourcePathToFile(ctx.Match.Args.ElementAt(0));
+            var filetext = Processor.Process(ProcessRequest.FromExistingRequest(ctx, 
+                filePath));
 
-            var matches = Processor.GetMatches(filetext.ToString());
+            var matches = CommandProcessor.GetRegexMatches(filetext.Text.ToString());
             ctx.Text = ctx.Text.Replace(ctx.Match.Match.Value, "");
 
             Func<StringBuilder> final = null;
             foreach (var m in matches)
             {
-                var info = Processor.GetCommandInfoFromMatch(m);
+                var info = CommandProcessor.ParseCommandMatches(m);
                 if (info.CommandName == "placeholder")
                 {
                     final = ()=> 
                     {
                         
-                        return filetext.Replace(m.Value, ctx.Text.ToString());
+                        return filetext.Text.Replace(m.Value, ctx.Text.ToString());
                     };
                 }
             }

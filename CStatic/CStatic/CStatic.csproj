@@ -49,7 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domain\CommandMatch.cs" />
+    <Compile Include="Domain\CommandProcessor.cs" />
     <Compile Include="Domain\Commands\CommandContext.cs" />
+    <Compile Include="Domain\ExecutionTracker.cs" />
     <Compile Include="Domain\Extensions.cs" />
     <Compile Include="Domain\Commands\HiCommand.cs" />
     <Compile Include="Domain\Commands\ICommand.cs" />
@@ -58,6 +60,8 @@
     <Compile Include="Domain\Commands\GetVarCommand.cs" />
     <Compile Include="Domain\ItemConfig.cs" />
     <Compile Include="Domain\Processor.cs" />
+    <Compile Include="Domain\ProcessRequest.cs" />
+    <Compile Include="Domain\ProcessResult.cs" />
     <Compile Include="Domain\Runner.cs" />
     <Compile Include="Domain\SiteConfig.cs" />
     <Compile Include="Program.cs" />

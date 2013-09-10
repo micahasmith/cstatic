@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GrabVarCommand_tests.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Helpers_tests.cs" />
     <Compile Include="IncludeCommand_tests.cs" />
@@ -57,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="testdata\GrabVarCommand_tests\site.json" />
     <None Include="testdata\IncludeCommand_tests\site.json" />
     <None Include="testdata\VarCommand_tests\site.json" />
     <None Include="testdata\PlaceInCommand_tests\site.json" />
@@ -69,6 +71,8 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="testdata\GrabVarCommand_tests\child1.html" />
+    <Content Include="testdata\GrabVarCommand_tests\master.html" />
     <Content Include="testdata\IncludeCommand_tests\child1.html" />
     <Content Include="testdata\IncludeCommand_tests\master.html" />
     <Content Include="testdata\VarCommand_tests\child2.html" />

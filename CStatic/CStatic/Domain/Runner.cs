@@ -17,7 +17,7 @@ namespace CStatic.Domain
             PrepDist(sConfig);
             
 
-            foreach (var item in sConfig.Items.AsParallel())
+            foreach (var item in sConfig.Items)
             {
                 RunItem(sConfig, item);
             }
@@ -69,54 +69,27 @@ namespace CStatic.Domain
             Console.WriteLine("running {0}", item.Source);
             var dist = sConfig.ExportDir;
             var itemDest = item.Dest ?? item.Source;
-            var finalDest = Path.Combine(dist, itemDest);
-
-            EnsureDirectory(dist, itemDest);
+            var finalDest = sConfig.GetExportPathToFile(itemDest);
 
             if (!File.Exists(finalDest))
             {
-                var output = new Processor().ProcessFile(sConfig, item,Path.Combine(sConfig.WorkingDir, item.Source),vars);
-                File.WriteAllText(finalDest, output);
+                var result = Processor.Process(new ProcessRequest()
+                {
+                    SiteConfig = sConfig,
+                    ItemConfig = item,
+                    SourceFileName = Path.Combine(sConfig.WorkingDir, item.Source),
+                    Vars = vars
+                });
+                Console.WriteLine("writing {0}", finalDest);
+                File.WriteAllText(finalDest, result.Text.ToString());
                 item.HadRun = true;
             }
             return finalDest;
         }
 
-        public void EnsureDirectory(string dist, string itemDest)
-        {
-            var working = dist;
-            var parts = itemDest.Split('\\');
-            foreach (var p in parts)
-            {
-                if (!p.Contains("."))
-                {
-                    working = Path.Combine(dist, p);
-                    if (!Directory.Exists(working))
-                        Directory.CreateDirectory(working);
-                }
-            }
-        }
+        
 
-        public static StringBuilder GetFileText(SiteConfig sConfig, string file, Dictionary<string,string> vars = null)
-        {
-            var distFile = sConfig.Items.FirstOrDefault(i => i.Source == file);
-            string incText = null;
-            if (distFile != null)
-            {
-                new Runner().RunItem(sConfig, distFile,vars);
-                var genpath = Path.Combine(sConfig.ExportDir, file);
-                if (File.Exists(genpath))
-                {
-                    incText = File.ReadAllText(genpath);
-                    return new StringBuilder(incText);
-                }
-            }
-            
-            var ff = Path.Combine(sConfig.WorkingDir, file);
-            incText = new Processor().ProcessFile(sConfig,null, ff,vars);
-            
-            return new StringBuilder(incText);
-        }
+
 
         
 

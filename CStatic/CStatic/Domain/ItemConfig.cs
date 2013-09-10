@@ -12,7 +12,6 @@ namespace CStatic.Domain
         public string Source { get; set; }
         public string Dest { get; set; }
 
-
         public Dictionary<string, string> Vars { get; set; }
 
         public bool HadRun { get; set; }

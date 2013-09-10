@@ -18,9 +18,10 @@ namespace CStatic.Domain.Commands
         public StringBuilder Run(CommandContext ctx)
         {
             var file = ctx.Match.Args.ElementAt(0);
-            var incText = Runner.GetFileText(ctx.SiteConfig, file);
+            string filePath = ctx.SiteConfig.GetSourcePathToFile(file);
+            var incText = Processor.Process(ProcessRequest.FromExistingRequest(ctx, filePath));
 
-            return ctx.Text.Replace(ctx.Match.Match.Value, incText.ToString());
+            return ctx.Text.Replace(ctx.Match.Match.Value, incText.Text.ToString());
         }
 
        

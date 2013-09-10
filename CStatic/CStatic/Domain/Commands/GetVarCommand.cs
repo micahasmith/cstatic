@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MoreLinq;
 
 namespace CStatic.Domain.Commands
 {
@@ -22,14 +23,38 @@ namespace CStatic.Domain.Commands
                 return ctx.Text;
             }
 
-            var arg = ctx.Match.Args.ElementAt(0);
-            if(string.IsNullOrEmpty(arg) || !ctx.Vars.ContainsKey(arg)){
-                Console.WriteLine("referenced arg for {0} doesnt exist",ctx.Match.Match.Value);
-                return ctx.Text;
+            var args = ctx.Match.Args.GetArgs().AsDictionary();
+
+            //if we need to pull in vars from another file
+            if (args.ContainsKey("from"))
+            {
+                var newVars = new Dictionary<string,string>();
+                string fileName = ctx.SiteConfig.GetSourcePathToFile(args["from"]);
+                var processResult = Processor.Process(ProcessRequest.FromExistingRequest(ctx, fileName));
+                CommandProcessor.GetCommandMatchesFromText(processResult.Text.ToString())
+                    .Where(i => i.CommandName == "var" || i.CommandName == "val")
+                    .Select(i => i.Args.GetArgs().AsDictionary())
+                    .ForEach(d => d.Keys.ForEach(i => newVars[i] = d[i]));
+
+                return GetVal(ctx.Match.Args.ElementAt(0), newVars, ctx.Text, ctx.Match.Match.Value);
+                    
             }
 
-            var val  = ctx.Vars[arg];
-            return ctx.Text.Replace(ctx.Match.Match.Value, val);
+            return GetVal(ctx.Match.Args.ElementAt(0), ctx.Vars, ctx.Text, ctx.Match.Match.Value);
+
+        }
+
+        private static StringBuilder GetVal(string key, Dictionary<string, string> vars, StringBuilder text, string matchValue)
+        {
+            var arg = key;
+            if (string.IsNullOrEmpty(arg) || !vars.ContainsKey(arg))
+            {
+                Console.WriteLine("referenced arg for {0} doesnt exist", matchValue);
+                return text;
+            }
+
+            var val = vars[arg];
+            return text.Replace(matchValue, val);
 
         }
     }

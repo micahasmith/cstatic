@@ -45,6 +45,7 @@ namespace CStatic.Tests
             string outText = File.ReadAllText(outPath);
             Assert.Contains("<title>saying hello", outText);
             Assert.Contains("content=\"this is", outText);
+            Assert.Contains("child text", outText);
             Console.WriteLine("final html:{0}",outText);
         }
     }

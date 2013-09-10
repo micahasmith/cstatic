@@ -39,8 +39,17 @@ namespace CStatic.Domain
             yield break;
         }
 
+        public static Dictionary<string, string> AsDictionary(this IEnumerable<KeyValuePair<string, string>> args)
+        {
+            var r = new Dictionary<string,string>();
+            foreach (var arg in args)
+                r[arg.Key] = arg.Value;
+            return r;
+        }
+
         public static void MixIn(this Dictionary<string, string> me, Dictionary<string, string> other)
         {
+            if (other == null) return;
             foreach (var k in other.Keys)
             {
                 me[k] = other[k];
