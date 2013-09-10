@@ -1,6 +1,7 @@
 ﻿using CStatic.Domain;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,7 @@ namespace CStatic.Tests
 
             string outText = File.ReadAllText(outPath);
             Assert.Contains("hello micah", outText);
+            Console.WriteLine("final html:{0}", outText);
         }
 
 
@@ -42,6 +44,8 @@ namespace CStatic.Tests
             
             string outText = File.ReadAllText(outPath);
             Assert.Contains("<title>saying hello", outText);
+            Assert.Contains("content=\"this is", outText);
+            Console.WriteLine("final html:{0}",outText);
         }
     }
 }

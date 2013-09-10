@@ -28,6 +28,7 @@ namespace CStatic.Tests
 
             string outText = File.ReadAllText(outPath);
             Assert.Contains("hello include!", outText);
+            Console.WriteLine("final html:{0}", outText);
         }
     }
 }
