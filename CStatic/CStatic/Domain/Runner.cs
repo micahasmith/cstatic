@@ -14,13 +14,57 @@ namespace CStatic.Domain
     {
         public void Run(SiteConfig sConfig)
         {
+            PrepConfig(sConfig);
             PrepDist(sConfig);
-            
+            ImplicitlyAddToSiteConfig(sConfig);
 
             foreach (var item in sConfig.Items)
             {
                 RunItem(sConfig, item);
             }
+        }
+
+        private void PrepConfig(SiteConfig sConfig)
+        {
+            Console.WriteLine("prepping site config...");
+            foreach (var i in sConfig.Items)
+            {
+                i.Source = PrepPath(i.Source);
+                i.Dest = PrepPath(i.Dest);
+            }
+        }
+
+        private void ImplicitlyAddToSiteConfig(SiteConfig sConfig)
+        {
+            Console.WriteLine("implicitly adding files that need generated...");
+            foreach (string newPath in Directory.GetFiles(sConfig.WorkingDir, "*.*",
+                SearchOption.AllDirectories))
+            {
+                //add in files that have a var dest
+                var vars = Processor.QuickGetFileVars(newPath);
+                var shortPath = newPath.Replace(sConfig.WorkingDir, "");
+                shortPath = PrepPath(shortPath);
+                
+                string dest = null;
+                if (vars.TryGetValue("dest", out dest))
+                {
+                    //dont interfere with existing items
+                    if (sConfig.Items.Any(i => i.Dest == dest)) 
+                        continue;
+                    sConfig.Items.Add(new ItemConfig()
+                    {
+                        Source = shortPath,
+                        Dest = dest,
+                    });
+                }
+            }
+        }
+
+        private string PrepPath(string path)
+        {
+            while (path.StartsWith("\\") || path.StartsWith("/"))
+                path = path.Substring(1);
+            return path;
         }
 
         public void Run(string siteConfigJson)
@@ -30,7 +74,6 @@ namespace CStatic.Domain
 
         private static void PrepDist(SiteConfig sConfig)
         {
-           
             var dist = sConfig.ExportDir;
 
             if (!Directory.Exists(dist))

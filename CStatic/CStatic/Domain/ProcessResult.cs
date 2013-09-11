@@ -8,6 +8,7 @@ namespace CStatic.Domain
     public class ProcessResult
     {
         public StringBuilder Text { get; set; }
+        public Dictionary<string, string> Vars { get; set; }
         public string DestFilePath { get; set; }
     }
 }

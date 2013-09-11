@@ -36,6 +36,10 @@ namespace CStatic.Domain.Commands
                     .Select(i => i.Args.GetArgs().AsDictionary())
                     .ForEach(d => d.Keys.ForEach(i => newVars[i] = d[i]));
 
+                //add in the cached items vars -- if it was cached
+                // then they would not be in there
+                newVars.MixIn(processResult.Vars);
+
                 return GetVal(ctx.Match.Args.ElementAt(0), newVars, ctx.Text, ctx.Match.Match.Value);
                     
             }

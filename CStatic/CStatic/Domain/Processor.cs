@@ -41,9 +41,11 @@ namespace CStatic.Domain
                     var cacheMatches = CommandProcessor.GetCommandMatchesFromText(cached.Text.ToString())
                         .Where(i => i.CommandName == "var" || i.CommandName == "vars" || i.CommandName == "getvar")
                         .Where(i => !req.ExcludeCommands.Contains(i.CommandName));
-                    var fvars = CompileVars(req.ItemConfig, req.Vars, cachedText.ToString(), cacheMatches);
+                    var fvars = CompileVars(req.ItemConfig, req.Vars, cachedText, cacheMatches);
+                    fvars.MixIn(cached.Vars);
                     foreach (var match in cacheMatches)
                         cachedText = ProcessMatch(req, cachedText, fvars, match);
+                    result.Vars = fvars;
                     result.Text = cachedText;
                     return result;
                 }
@@ -56,13 +58,14 @@ namespace CStatic.Domain
             //get all matches
             var matches = CommandProcessor.GetCommandMatchesFromText(text);
 
-            var finalVars = CompileVars(req.ItemConfig, req.Vars, text, matches);
+            var finalVars = CompileVars(req.ItemConfig, req.Vars, sb, matches);
 
             foreach (var match in matches)
             {
                 sb = ProcessMatch(req, sb, finalVars, match);
             }
             result.Text = sb;
+            result.Vars = finalVars;
 
             if (!string.IsNullOrEmpty(req.SourceFileName))
                 _Tracker.AddResult(req, result);
@@ -85,7 +88,7 @@ namespace CStatic.Domain
             return sb;
         }
 
-        private static Dictionary<string, string> CompileVars(ItemConfig item, Dictionary<string, string> vars, string text, IEnumerable<CommandMatch> matches)
+        private static Dictionary<string, string> CompileVars(ItemConfig item, Dictionary<string, string> vars, StringBuilder text, IEnumerable<CommandMatch> matches)
         {
             var globalVars = new Dictionary<string, string>();
             var now = DateTime.Now;
@@ -109,14 +112,27 @@ namespace CStatic.Domain
             return finalVars;
         }
 
-        private static Dictionary<string, string> GetPageVars(string text, IEnumerable<CommandMatch> matches)
+        private static Dictionary<string, string> GetPageVars(StringBuilder text, IEnumerable<CommandMatch> matches)
         {
             var r = new Dictionary<string, string>();
-            matches.Where(i => i.CommandName == "var" || i.CommandName == "vars")
-                .SelectMany(i => i.Args.GetArgs())
+            var vars = matches.Where(i => i.CommandName == "var" || i.CommandName == "vars");
+            vars.SelectMany(i => i.Args.GetArgs())
                 .ForEach((i) => r[i.Key] = i.Value);
+            vars.ForEach(i => text.Replace(i.Match.Value, ""));
+                
             return r;
             
+        }
+
+        public static Dictionary<string, string> QuickGetFileVars(string filePath)
+        {
+            var text = File.ReadAllText(filePath);
+            var r = new Dictionary<string, string>();
+            CommandProcessor.GetCommandMatchesFromText(text)
+                .Where(i => i.CommandName == "var" || i.CommandName == "vars")
+                .SelectMany(i => i.Args.GetArgs())
+                .ForEach(i => r[i.Key] = i.Value);
+            return r;
         }
     }
 }

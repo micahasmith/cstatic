@@ -9,30 +9,30 @@ using Xunit;
 
 namespace CStatic.Tests
 {
-    public class GrabVarCommand_tests
+    public class ImplicitGeneration_tests
     {
         private static TestContext _Context = null;
 
-        static GrabVarCommand_tests()
+        static ImplicitGeneration_tests()
         {
-            _Context = new TestContext("GrabVarCommand_tests");
+            _Context = new TestContext("ImplicitGeneration_tests");
 
         }
         [Fact]
-        public void can_grab_vars_from_other_files()
+        public void can_do_include()
         {
             var runner = new Runner();
             runner.Run(_Context.SiteConfig);
-            string outPath = Path.Combine(_Context.TestDir, "dist", "out1.html");
+            string outPath = Path.Combine(_Context.TestDir, "dist", "index.html");
             Assert.True(File.Exists(outPath));
 
-
             string outText = File.ReadAllText(outPath);
-            Assert.Contains("<title>saying hello", outText);
-            Assert.Contains("content=\"this is", outText);
+
+
+
+
             Console.WriteLine("final html:{0}", outText);
+
         }
-
-
     }
 }

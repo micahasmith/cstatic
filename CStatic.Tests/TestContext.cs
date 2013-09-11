@@ -17,10 +17,15 @@ namespace CStatic.Tests
         public TestContext(string testRootDir)
         {
             TestDir = Path.Combine(Helpers.GetTestDirectory(), "testdata", testRootDir );
-            SiteConfig = File.ReadAllText(Path.Combine(TestDir, "site.json")).FromJson<SiteConfig>();
+            var siteJsonPath = Path.Combine(TestDir, "site.json");
+            if (File.Exists(siteJsonPath))
+                SiteConfig = File.ReadAllText(siteJsonPath).FromJson<SiteConfig>();
+            else
+                SiteConfig = new Domain.SiteConfig();
             SiteConfig.ExportDir = Path.Combine(TestDir, "dist");
             SiteConfig.WorkingDir = Path.Combine(TestDir);
 
         }
+
     }
 }

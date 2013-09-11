@@ -55,5 +55,11 @@ namespace CStatic.Domain
                 me[k] = other[k];
             }
         }
+
+        public static Dictionary<string, string> MixInAndReturn(this Dictionary<string, string> me, Dictionary<string, string> other)
+        {
+            me.MixIn(other);
+            return me;
+        }
     }
 }

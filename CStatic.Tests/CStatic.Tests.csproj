@@ -49,6 +49,7 @@
     <Compile Include="GrabVarCommand_tests.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Helpers_tests.cs" />
+    <Compile Include="ImplicitGeneration_tests.cs" />
     <Compile Include="IncludeCommand_tests.cs" />
     <Compile Include="PlaceInCommand_tests.cs" />
     <Compile Include="processor_tests.cs" />
@@ -73,6 +74,8 @@
   <ItemGroup>
     <Content Include="testdata\GrabVarCommand_tests\child1.html" />
     <Content Include="testdata\GrabVarCommand_tests\master.html" />
+    <Content Include="testdata\ImplicitGeneration_tests\child1.html" />
+    <Content Include="testdata\ImplicitGeneration_tests\master.html" />
     <Content Include="testdata\IncludeCommand_tests\child1.html" />
     <Content Include="testdata\IncludeCommand_tests\master.html" />
     <Content Include="testdata\VarCommand_tests\child2.html" />
